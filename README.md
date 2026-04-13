@@ -4,7 +4,7 @@
 - **Objetivo**: atividade avaliativa com conceitos básicos de react (jsx, props, state e eventos)
 - **Público alvo**: alunos da disciplina de [POS](https://github.com/infoweb-pos/) do curso de [Infoweb](https://diatinf.ifrn.edu.br/cursos/tecnico-em-informatica-para-internet/) na [DIATINF](https://diatinf.ifrn.edu.br/) no [CNAT-IFRN](https://portal.ifrn.edu.br/campus/natalcentral/)
 - **Professor**: [L A Minora](https://github.com/leonardo-minora/)
-- **Aluno**: FIXME
+- **Aluno**: Caio Henrique Cruz da Silva
 
 ## Checklist
 - [ ] 1. Fork desse repositório
