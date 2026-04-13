@@ -1,4 +1,4 @@
-# 2026 - POS - Atividade avaliativa do 1o bimestre no. 1
+# 2026 - POS - Atividade avaliativa do 1o bimestre no. 2
 
 ## Informações gerais
 - **Objetivo**: atividade avaliativa com conceitos básicos de react (jsx, props, state e eventos)
