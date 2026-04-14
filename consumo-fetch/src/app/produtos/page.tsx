@@ -1,19 +1,15 @@
+"use client";
+
 import Link from "next/link";
-
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-
-type Product = {
-  id: number;
-  title: string;
-  description: string;
-  price: number;
-};
+import { applyOverrides, type EditableProduct } from "@/lib/product-overrides";
 
 type ProductsResponse = {
-  products: Product[];
+  products: EditableProduct[];
 };
 
-async function getProducts(): Promise<Product[]> {
+async function getProducts(): Promise<EditableProduct[]> {
   const response = await fetch("https://dummyjson.com/products?limit=12", {
     cache: "no-store",
   });
@@ -26,8 +22,25 @@ async function getProducts(): Promise<Product[]> {
   return data.products;
 }
 
-export default async function ProdutosPage() {
-  const products = await getProducts();
+export default function ProdutosPage() {
+  const [products, setProducts] = useState<EditableProduct[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const apiProducts = await getProducts();
+        setProducts(applyOverrides(apiProducts));
+      } catch {
+        setErrorMessage("Não foi possível carregar os produtos");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadProducts();
+  }, []);
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-10">
@@ -44,6 +57,14 @@ export default async function ProdutosPage() {
           <Link href="/">Voltar para início</Link>
         </Button>
       </div>
+
+      {isLoading ? (
+        <p className="text-sm text-muted-foreground">Carregando produtos...</p>
+      ) : null}
+
+      {errorMessage ? (
+        <p className="text-sm text-destructive">{errorMessage}</p>
+      ) : null}
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {products.map((product) => (

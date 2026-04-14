@@ -3,9 +3,9 @@
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 import { useState } from "react";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { saveProductOverride } from "@/lib/product-overrides";
 
 type Product = {
   id: number;
@@ -53,8 +53,11 @@ export function ProductEditForm({ product }: ProductEditFormProps) {
         throw new Error("Falha ao atualizar o produto");
       }
 
+      const updatedProduct: Product = await response.json();
+      saveProductOverride(updatedProduct);
+
       setStatusMessage("Produto atualizado com sucesso!");
-      router.refresh();
+      router.push("/produtos");
     } catch {
       setErrorMessage("Não foi possível atualizar o produto. Tente novamente.");
     } finally {
