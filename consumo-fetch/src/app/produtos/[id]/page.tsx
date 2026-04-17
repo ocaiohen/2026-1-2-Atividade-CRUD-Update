@@ -5,6 +5,8 @@ import { use, useEffect, useState } from "react";
 import { ProductEditForm } from "@/components/product-edit-form";
 import { Button } from "@/components/ui/button";
 import { applyOverride, type EditableProduct } from "@/lib/product-overrides";
+import { apiGet, type ApiError } from "@/lib/api-client";
+import { API_ENDPOINTS } from "@/lib/api-config";
 
 type ProductPageProps = {
   params: Promise<{
@@ -13,20 +15,18 @@ type ProductPageProps = {
 };
 
 async function getProductById(id: string): Promise<EditableProduct | null> {
-  const response = await fetch(`https://dummyjson.com/products/${id}`, {
-    cache: "no-store",
-  });
-
-  if (response.status === 404) {
-    return null;
+  try {
+    const product = await apiGet<EditableProduct>(
+      API_ENDPOINTS.PRODUCT_BY_ID(id),
+    );
+    return product;
+  } catch (error) {
+    const apiError = error as ApiError;
+    if (apiError.statusCode === 404) {
+      return null;
+    }
+    throw error;
   }
-
-  if (!response.ok) {
-    throw new Error("Não foi possível carregar o produto");
-  }
-
-  const product: EditableProduct = await response.json();
-  return product;
 }
 
 export default function EditarProdutoPage({ params }: ProductPageProps) {
@@ -47,8 +47,9 @@ export default function EditarProdutoPage({ params }: ProductPageProps) {
         }
 
         setProduct(applyOverride(apiProduct));
-      } catch {
-        setErrorMessage("Não foi possível carregar o produto");
+      } catch (error) {
+        const apiError = error as ApiError;
+        setErrorMessage(apiError.message || "Não foi possível carregar o produto");
       } finally {
         setIsLoading(false);
       }
@@ -64,24 +65,24 @@ export default function EditarProdutoPage({ params }: ProductPageProps) {
         <p className="text-sm text-muted-foreground">ID: {id}</p>
       </div>
 
-      {notFoundProduct ? (
+      {notFoundProduct && (
         <div className="space-y-4">
           <p className="text-sm text-destructive">Produto não encontrado.</p>
           <Button asChild variant="outline">
             <Link href="/produtos">Voltar para lista</Link>
           </Button>
         </div>
-      ) : null}
+      )}
 
-      {isLoading ? (
+      {isLoading && (
         <p className="text-sm text-muted-foreground">Carregando produto...</p>
-      ) : null}
+      )}
 
-      {errorMessage ? (
+      {errorMessage && (
         <p className="text-sm text-destructive">{errorMessage}</p>
-      ) : null}
+      )}
 
-      {product ? <ProductEditForm product={product} /> : null}
+      {product && <ProductEditForm product={product} />}
     </main>
   );
 }

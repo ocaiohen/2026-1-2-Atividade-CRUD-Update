@@ -4,21 +4,17 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { applyOverrides, type EditableProduct } from "@/lib/product-overrides";
+import { apiGet, type ApiError } from "@/lib/api-client";
+import { API_ENDPOINTS } from "@/lib/api-config";
 
 type ProductsResponse = {
   products: EditableProduct[];
 };
 
 async function getProducts(): Promise<EditableProduct[]> {
-  const response = await fetch("https://dummyjson.com/products?limit=12", {
-    cache: "no-store",
-  });
-
-  if (!response.ok) {
-    throw new Error("Não foi possível carregar os produtos");
-  }
-
-  const data: ProductsResponse = await response.json();
+  const data = await apiGet<ProductsResponse>(
+    `${API_ENDPOINTS.PRODUCTS}?limit=12`,
+  );
   return data.products;
 }
 
@@ -32,8 +28,9 @@ export default function ProdutosPage() {
       try {
         const apiProducts = await getProducts();
         setProducts(applyOverrides(apiProducts));
-      } catch {
-        setErrorMessage("Não foi possível carregar os produtos");
+      } catch (error) {
+        const apiError = error as ApiError;
+        setErrorMessage(apiError.message || "Não foi possível carregar os produtos");
       } finally {
         setIsLoading(false);
       }
@@ -58,13 +55,17 @@ export default function ProdutosPage() {
         </Button>
       </div>
 
-      {isLoading ? (
+      {isLoading && (
         <p className="text-sm text-muted-foreground">Carregando produtos...</p>
-      ) : null}
+      )}
 
-      {errorMessage ? (
+      {errorMessage && (
         <p className="text-sm text-destructive">{errorMessage}</p>
-      ) : null}
+      )}
+
+      {!isLoading && !errorMessage && products.length === 0 && (
+        <p className="text-sm text-muted-foreground">Nenhum produto encontrado.</p>
+      )}
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {products.map((product) => (
